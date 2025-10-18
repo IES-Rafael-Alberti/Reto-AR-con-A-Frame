@@ -1,49 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+  <head>
     <meta charset="utf-8" />
     <title>Avatar AR Animado</title>
-
-    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-
-    <script>
-        AFRAME.registerComponent('ar-hit-test', {
-            init: function () {
-                this.el.addEventListener('ar-hit-test-start', (e) => {
-                    this.el.querySelector('#avatar-model').setAttribute('visible', 'true');
-                    this.el.querySelector('a-ring').setAttribute('visible', 'false');
-                });
-            }
-        });
-    </script>
-</head>
-<body style="margin: 0; overflow: hidden;">
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
     <a-scene
-        webxr="mode: ar; requiredFeatures: hit-test, light-estimation;"
-        renderer="colorManagement: true; physicallyCorrectLights: true;"
-        xr-mode-ui="enabled: true"
+      webxr="mode: ar; optionalFeatures: dom-overlay;"
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
+      xr-mode-ui="enabled: true"
     >
-        <a-entity light="type: ambient; intensity: 1"></a-entity>
-        <a-entity light="type: directional; intensity: 0.8" position="1 1 0"></a-entity>
-        
-        <a-entity
-            id="avatar-container"
-            ar-hit-test
-            position="0 0 0"
-        >
-            <a-entity
-                id="avatar-model"
-                gltf-model="url(me_greetings.glb)"
-                rotation="0 0 0"   
-                scale="1 1 1"
-                animation-mixer="clip: *; loop: repeat"
-                visible="false" ></a-entity>
+    <a-scene xr-mode-ui="XRMode: xr;">
+      <a-entity light="type: ambient; intensity: 1"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="1 1 0"></a-entity>
 
-            <a-ring color="#00ffaa" radius="0.1" rotation="-90 0 0"></a-ring>
+      <a-plane rotation="-90 0 0" width="4" height="4" color="#999"></a-plane>
 
-        </a-entity>
-        
-        </a-scene>
-</body>
+
+<a-entity
+  gltf-model="url(me_greetings.glb)"
+  rotation="0 0 0"   
+  scale="1 1 1"
+  animation-mixer="clip: *; loop: repeat"
+></a-entity>
+      <a-entity camera look-controls position="0 1.6 3"></a-entity>
+    </a-scene>
+  </body>
 </html>
