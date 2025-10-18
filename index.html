@@ -1,82 +1,32 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <title>Avatar AR Animado - con animación</title>
+  <head>
+    <meta charset="utf-8" />
+    <title>Avatar AR Animado</title>
 
-  <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 
-  <!-- animation-mixer (componente oficial independiente) -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe-animation-mixer@7.0.2/dist/aframe-animation-mixer.min.js"></script>
-</head>
-<body style="margin:0;overflow:hidden;">
-  <div id="overlay" style="position: absolute; top: 10px; left: 10px; color: white; z-index: 2;">
-    AR listo — toca para colocar
-  </div>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene
+      webxr="mode: ar;" 
+      renderer="colorManagement: true; physicallyCorrectLights: true;"
+      xr-mode-ui="enabled: true"
+    >
+      <a-entity light="type: ambient; intensity: 1"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="1 1 0"></a-entity>
 
-  <a-scene
-    embedded
-    webxr="optionalFeatures: hit-test, dom-overlay; overlayElement: #overlay;"
-    renderer="colorManagement: true; physicallyCorrectLights: true;"
-  >
-    <a-entity light="type: ambient; intensity: 1"></a-entity>
-    <a-entity light="type: directional; intensity: 0.8" position="1 1 0"></a-entity>
+      <a-plane rotation="-90 0 0" width="4" height="4" color="#999" visible="false"></a-plane> 
 
-    <!-- Plano de referencia (visible en modo no-AR) -->
-    <a-plane rotation="-90 0 0" width="4" height="4" color="#999"></a-plane>
-
-    <!-- Contenedor donde colocaremos el avatar (inicialmente oculto / fuera de cámara) -->
-    <a-entity id="avatar-container" visible="true" position="0 0 -1">
-      <!-- Modelo GLB: animation-mixer sin clip fijo (lo controlamos via JS) -->
-      <a-entity id="avatar"
-                gltf-model="url(me_greetings.glb)"
-                scale="1 1 1"
-                animation-mixer>
-      </a-entity>
-    </a-entity>
-
-    <a-entity camera look-controls position="0 1.6 3"></a-entity>
-  </a-scene>
-
-  <script>
-    // Cuando el modelo cargue, listamos las animaciones y arrancamos la primera
-    const avatarEl = document.querySelector('#avatar');
-
-    avatarEl.addEventListener('model-loaded', (evt) => {
-      // accede al objeto THREE del glTF
-      const obj = avatarEl.getObject3D('mesh') || avatarEl.getObject3D('gltf-model');
-      // En algunas versiones la propiedad es 'model' en el evento:
-      const model = evt.detail && evt.detail.model ? evt.detail.model : (obj ? obj : null);
-
-      // Intenta obtener las animaciones expuestas
-      const animations = (model && model.animations) ? model.animations : (model && model.scene && model.scene.animations ? model.scene.animations : null);
-
-      console.log('model cargado:', model, 'animations:', animations);
-
-      if (animations && animations.length > 0) {
-        // Si hay animaciones, el componente animation-mixer las reconocerá.
-        // Forzamos que se reproduzca la primera animación:
-        // Usamos el componente a-frame para setear el clip por nombre:
-        const firstClipName = animations[0].name || null;
-        if (firstClipName) {
-          // Establece el clip por nombre (reproduce en loop)
-          avatarEl.setAttribute('animation-mixer', `clip: ${firstClipName}; loop: repeat; timeScale: 1`);
-          console.log('Reproduciendo clip:', firstClipName);
-        } else {
-          // Si no hay nombre, reproducimos el primer índice con "*" (fallback)
-          avatarEl.setAttribute('animation-mixer', 'clip: *; loop: repeat; timeScale: 1');
-          console.log('Reproduciendo todos los clips (fallback)');
-        }
-      } else {
-        console.warn('No se encontraron animaciones en el GLB. Revisa que el archivo contenga clips exportados.');
-      }
-    });
-
-    // (Opcional) debug: mostrar en consola errores de carga
-    avatarEl.addEventListener('model-error', (e) => {
-      console.error('Error cargando modelo:', e);
-    });
-  </script>
-</body>
+      <a-entity
+        gltf-model="url(me_greetings.glb)"
+        rotation="0 0 0"    
+        scale="1 1 1"
+        animation-mixer="clip: *; loop: repeat"
+      ></a-entity>
+      
+      <a-entity camera look-controls position="0 1.6 3"></a-entity>
+    </a-scene>
+  </body>
 </html>
