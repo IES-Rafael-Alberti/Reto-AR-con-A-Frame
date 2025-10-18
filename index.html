@@ -1,35 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="utf-8" />
-    <title>Avatar AR Animado</title>
-
-    <!-- A-Frame + módulo WebXR AR -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://aframe.io/releases/1.5.0/aframe-ar-module.min.js"></script>
-
-    <!-- animation-mixer -->
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <meta charset="UTF-8" />
+    <title>AR.js con A-Frame y GLB</title>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/2.2.1/aframe/build/aframe-ar.min.js"></script>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100%;
+      }
+      #enter-ar-btn {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        font-size: 16px;
+        background: #0069ff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: none;
+        z-index: 9999;
+      }
+    </style>
   </head>
-  <body style="margin: 0; overflow: hidden;">
+  <body>
+    <button id="enter-ar-btn">Entrar en AR</button>
     <a-scene
-      webxr="mode: ar; optionalFeatures: dom-overlay;"
-      renderer="colorManagement: true; physicallyCorrectLights: true;"
-      xr-mode-ui="enabled: true"
+      embedded
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; antialias: true"
+      device-orientation-permission-ui="enabled: false"
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+      xrweb="optionalFeatures: hit-test, local-floor, bounded-floor;"
     >
-      <a-entity light="type: ambient; intensity: 1"></a-entity>
-      <a-entity light="type: directional; intensity: 0.8" position="1 1 0"></a-entity>
-
-      <a-plane rotation="-90 0 0" width="4" height="4" color="#999"></a-plane>
-
-
-<a-entity
-  gltf-model="url(me_greetings.glb)"
-  rotation="0 0 0"   
-  scale="1 1 1"
-  animation-mixer="clip: *; loop: repeat"
-></a-entity>
-      <a-entity camera look-controls position="0 1.6 3"></a-entity>
+      <!-- Para AR.js con marcador -->
+      <a-marker
+        type="pattern"
+        url="https://raw.githubusercontent.com/jeromeetienne/AR.js/master/three.js/data/patt.hiro"
+      >
+        <a-entity
+          gltf-model="#me_greetings_model"
+          scale="0.5 0.5 0.5"
+          rotation="0 180 0"
+          position="0 0 0"
+          animation-mixer
+        ></a-entity>
+      </a-marker>
+      <!-- Alternativa para WebXR (modo inmersivo AR) -->
+      <a-entity
+        id="webxr-model"
+        visible="false"
+        scale="0.5 0.5 0.5"
+        rotation="0 180 0"
+        animation-mixer
+      >
+        <a-entity gltf-model="#me_greetings_model"></a-entity>
+      </a-entity>
+      <a-entity camera></a-entity>
+      <a-assets>
+        <a-asset-item
+          id="me_greetings_model"
+          src="me_greetings.glb"
+        ></a-asset-item>
+      </a-assets>
     </a-scene>
+    <script>
+      const enterARBtn = document.getElementById("enter-ar-btn");
+      const scene = document.querySelector("a-scene");
+      const webxrModel = document.getElementById("webxr-model"); // Verificar soporte WebXR AR async function checkWebXR() { if (navigator.xr) { try { const isARSupported = await navigator.xr.isSessionSupported('immersive-ar'); return isARSupported; } catch (e) { return false; } } return false; } async function startWebXRSession() { try { const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test', 'dom-overlay'], domOverlay: { root: document.body } }); scene.renderer.xr.setSession(session); webxrModel.setAttribute('visible', 'true'); enterARBtn.style.display = 'none'; } catch (e) { console.error('Error iniciando sesión WebXR AR:', e); } } // Al cargar, decide si activa automáticamente modo AR window.addEventListener('load', async () => { const supportsWebXR = await checkWebXR(); if (supportsWebXR && scene.hasLoaded) { enterARBtn.style.display = 'block'; } else { // Si no WebXR, AR.js con marcador se activa automáticamente enterARBtn.style.display = 'none'; } }); enterARBtn.addEventListener('click', () => { startWebXRSession(); });
+    </script>
   </body>
 </html>
